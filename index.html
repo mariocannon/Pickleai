@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PickleAI — Your personal pickleball coach, in your pocket</title>
+  <meta name="description" content="Upload a clip of your game and get pro-level pickleball feedback, drills, and a plan to improve — in minutes, not $100 an hour.">
+  <meta name="theme-color" content="#0A0F0B">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A5%92</text></svg>">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin: 0; min-height: 100vh; }
+    img, svg { max-width: 100%; }
+  </style>
+</head>
+<body>
+<style>
+  :root {
+    --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+
+    /* light theme (default) */
+    --bg: #EEF1E8;
+    --bg-2: #E5EADB;
+    --surface: #FBFCF8;
+    --surface-2: #F1F4EB;
+    --ink: #101710;
+    --ink-2: #2C352A;
+    --muted: #5A6353;
+    --line: #D5DBC9;
+    --line-strong: #C2CAB2;
+    --optic: #B7E01A;
+    --optic-ink: #141a05;      /* text on optic fills */
+    --teal: #0C7D6E;
+    --teal-bright: #10a894;
+    --court: #0F5F55;
+    --shadow: 20px 24px 60px -30px rgba(16,23,16,.45);
+    --glow: none;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0A0F0B;
+      --bg-2: #0D140E;
+      --surface: #121A14;
+      --surface-2: #16211A;
+      --ink: #EAF1E6;
+      --ink-2: #C7D2C1;
+      --muted: #8B9985;
+      --line: #23301F;
+      --line-strong: #33432C;
+      --optic: #CDF23F;
+      --optic-ink: #0d1206;
+      --teal: #2ED9C2;
+      --teal-bright: #46e9d3;
+      --court: #1FB6A6;
+      --shadow: 24px 30px 70px -34px rgba(0,0,0,.8);
+      --glow: 0 0 40px -8px rgba(205,242,63,.35);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #EEF1E8; --bg-2: #E5EADB; --surface: #FBFCF8; --surface-2: #F1F4EB;
+    --ink: #101710; --ink-2: #2C352A; --muted: #5A6353; --line: #D5DBC9; --line-strong: #C2CAB2;
+    --optic: #B7E01A; --optic-ink: #141a05; --teal: #0C7D6E; --teal-bright: #10a894; --court: #0F5F55;
+    --shadow: 20px 24px 60px -30px rgba(16,23,16,.45); --glow: none;
+  }
+  :root[data-theme="dark"] {
+    --bg: #0A0F0B; --bg-2: #0D140E; --surface: #121A14; --surface-2: #16211A;
+    --ink: #EAF1E6; --ink-2: #C7D2C1; --muted: #8B9985; --line: #23301F; --line-strong: #33432C;
+    --optic: #CDF23F; --optic-ink: #0d1206; --teal: #2ED9C2; --teal-bright: #46e9d3; --court: #1FB6A6;
+    --shadow: 24px 30px 70px -34px rgba(0,0,0,.8); --glow: 0 0 40px -8px rgba(205,242,63,.35);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .pai {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  .pai a { color: inherit; text-decoration: none; }
+  .wrap { width: 100%; max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+
+  /* utility label / mono readout */
+  .mono { font-family: var(--font-mono); }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--teal);
+    font-weight: 600;
+  }
+  .display {
+    font-weight: 800;
+    letter-spacing: -.035em;
+    line-height: .98;
+    text-wrap: balance;
+    margin: 0;
+  }
+  h2.display { font-size: clamp(1.9rem, 4.2vw, 3.1rem); }
+
+  /* ---------- nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-in { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.02em; font-size: 1.15rem; }
+  .brand .dot {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--optic);
+    box-shadow: var(--glow);
+    position: relative; flex: none;
+  }
+  .brand .dot::before, .brand .dot::after {
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+    background:
+      radial-gradient(circle at 30% 35%, transparent 1.4px, var(--optic-ink) 1.5px 2.4px, transparent 2.5px),
+      radial-gradient(circle at 62% 30%, transparent 1.2px, var(--optic-ink) 1.3px 2.1px, transparent 2.2px),
+      radial-gradient(circle at 45% 62%, transparent 1.3px, var(--optic-ink) 1.4px 2.3px, transparent 2.4px);
+    opacity: .8;
+  }
+  .nav-links { display: flex; align-items: center; gap: 28px; }
+  .nav-links a { color: var(--muted); font-size: .95rem; font-weight: 500; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav .cta-sm { color: var(--ink); }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-weight: 700; font-size: .98rem; letter-spacing: -.01em;
+    padding: 13px 22px; border-radius: 10px; cursor: pointer;
+    border: 1px solid transparent; transition: transform .12s ease, box-shadow .2s ease, background .2s;
+    white-space: nowrap;
+  }
+  .btn:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+  .btn-primary { background: var(--optic); color: var(--optic-ink); box-shadow: var(--glow); }
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line-strong); }
+  .btn-ghost:hover { border-color: var(--ink); transform: translateY(-2px); }
+  .btn-sm { padding: 9px 16px; font-size: .9rem; }
+
+  /* ---------- hero ---------- */
+  .hero { position: relative; padding: clamp(48px, 8vw, 104px) 0 72px; }
+  .court-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+  .court-bg svg { position: absolute; right: -6%; top: 4%; width: min(1000px, 96%); opacity: .5; }
+  .hero-grid {
+    position: relative; z-index: 1;
+    display: grid; grid-template-columns: 1.02fr 1.15fr; gap: clamp(28px, 4vw, 56px);
+    align-items: center;
+  }
+  .hero h1.display { font-size: clamp(2.7rem, 6vw, 4.6rem); }
+  .hero h1 .hl { color: var(--optic); }
+  @media (prefers-color-scheme: light) { .hero h1 .hl { color: var(--court); } }
+  :root[data-theme="light"] .hero h1 .hl { color: var(--court); }
+  :root[data-theme="dark"] .hero h1 .hl { color: var(--optic); }
+  .hero p.lede { color: var(--ink-2); font-size: clamp(1.05rem, 1.6vw, 1.28rem); max-width: 46ch; margin: 22px 0 30px; }
+  .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .trust { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 10px 22px; color: var(--muted); font-size: .86rem; font-family: var(--font-mono); }
+  .trust span { display: inline-flex; align-items: center; gap: 7px; }
+  .trust b { color: var(--teal); font-weight: 700; }
+
+  /* analysis panel */
+  .panel {
+    position: relative; background: var(--surface); border: 1px solid var(--line-strong);
+    border-radius: 18px; box-shadow: var(--shadow); overflow: hidden;
+  }
+  .panel-top { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+  .panel-top .rec { width: 9px; height: 9px; border-radius: 50%; background: #e5484d; box-shadow: 0 0 0 0 rgba(229,72,77,.5); animation: pulse 1.8s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(229,72,77,.5)} 70%{box-shadow:0 0 0 7px rgba(229,72,77,0)} 100%{box-shadow:0 0 0 0 rgba(229,72,77,0)} }
+  .panel-top .lbl { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
+  .panel-top .grade { margin-left: auto; font-family: var(--font-mono); font-size: .74rem; color: var(--teal); font-weight: 700; }
+  .frame { position: relative; aspect-ratio: 16 / 11; background:
+      linear-gradient(180deg, color-mix(in srgb, var(--court) 22%, var(--surface)) 0%, var(--surface) 62%); }
+  .frame svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .callout {
+    position: absolute; font-family: var(--font-mono); font-size: .66rem; letter-spacing: .04em;
+    background: color-mix(in srgb, var(--ink) 90%, transparent); color: var(--bg);
+    padding: 5px 8px; border-radius: 6px; white-space: nowrap; border: 1px solid var(--teal);
+    box-shadow: 0 6px 18px -8px rgba(0,0,0,.5);
+  }
+  :root[data-theme="light"] .callout, .callout { }
+  .callout .ok { color: var(--optic); }
+  .co1 { top: 15%; right: 6%; }
+  .co2 { top: 45%; left: 5%; }
+  .co3 { bottom: 12%; right: 10%; }
+  .panel-foot { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); }
+  .stat { padding: 12px 10px; text-align: center; border-right: 1px solid var(--line); }
+  .stat:last-child { border-right: 0; }
+  .stat .n { font-family: var(--font-mono); font-weight: 700; font-size: 1.15rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .stat .k { font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-family: var(--font-mono); margin-top: 2px; }
+
+  /* ---------- section scaffolding ---------- */
+  section { position: relative; }
+  .band { padding: clamp(56px, 8vw, 96px) 0; }
+  .band-alt { background: var(--bg-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .sec-head { max-width: 60ch; margin-bottom: 44px; }
+  .sec-head p { color: var(--muted); margin: 14px 0 0; font-size: 1.08rem; }
+
+  /* problem */
+  .problem .big { font-size: clamp(1.5rem, 3.4vw, 2.4rem); font-weight: 700; letter-spacing: -.02em; line-height: 1.25; max-width: 20ch; }
+  .problem .big em { font-style: normal; color: var(--teal); }
+  .problem-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; align-items: center; }
+  .problem-list { display: flex; flex-direction: column; gap: 2px; border-left: 2px solid var(--line-strong); }
+  .problem-list div { padding: 12px 0 12px 18px; color: var(--ink-2); }
+  .problem-list div b { color: var(--ink); }
+
+  /* steps */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 26px 24px; position: relative; }
+  .step .idx { font-family: var(--font-mono); font-size: .78rem; color: var(--teal); font-weight: 700; letter-spacing: .1em; }
+  .step h3 { font-size: 1.22rem; letter-spacing: -.02em; margin: 14px 0 8px; }
+  .step p { color: var(--muted); margin: 0; font-size: .98rem; }
+  .step .ic { width: 34px; height: 34px; margin-top: 14px; color: var(--court); }
+  :root[data-theme="dark"] .step .ic { color: var(--optic); }
+
+  /* sample analysis (interactive) */
+  .sample-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: 36px; align-items: start; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+  .tab {
+    font-family: var(--font-mono); font-size: .78rem; letter-spacing: .04em;
+    padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line-strong);
+    background: transparent; color: var(--muted); cursor: pointer; transition: all .15s;
+  }
+  .tab:hover { color: var(--ink); border-color: var(--ink); }
+  .tab[aria-selected="true"] { background: var(--optic); color: var(--optic-ink); border-color: var(--optic); font-weight: 700; }
+  .tab:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+  .report { background: var(--surface); border: 1px solid var(--line-strong); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
+  .report-hd { padding: 18px 22px; border-bottom: 1px solid var(--line); display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .report-hd .t { font-weight: 700; letter-spacing: -.02em; }
+  .report-hd .sc { font-family: var(--font-mono); font-weight: 700; color: var(--teal); font-variant-numeric: tabular-nums; }
+  .fix { padding: 18px 22px; border-bottom: 1px solid var(--line); display: flex; gap: 14px; }
+  .fix:last-child { border-bottom: 0; }
+  .fix .rank { font-family: var(--font-mono); font-weight: 800; color: var(--optic-ink); background: var(--optic); width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; font-size: .82rem; flex: none; }
+  :root[data-theme="dark"] .fix .rank { color: var(--optic-ink); }
+  .fix h4 { margin: 0 0 4px; font-size: 1.02rem; letter-spacing: -.01em; }
+  .fix p { margin: 0; color: var(--muted); font-size: .93rem; }
+  .fix .drill { margin-top: 8px; font-family: var(--font-mono); font-size: .74rem; color: var(--teal); }
+  .fix .drill::before { content: "▸ DRILL  "; opacity: .8; }
+  .scorebars { display: grid; gap: 12px; }
+  .sb { display: grid; grid-template-columns: 140px 1fr 44px; align-items: center; gap: 12px; }
+  .sb .lab { font-size: .82rem; color: var(--ink-2); font-family: var(--font-mono); letter-spacing: .02em; }
+  .sb .track { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; border: 1px solid var(--line); }
+  .sb .fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--optic)); border-radius: 99px; transition: width .8s cubic-bezier(.2,.7,.2,1); }
+  .sb .v { font-family: var(--font-mono); font-size: .82rem; text-align: right; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .sample-note { margin-top: 20px; color: var(--muted); font-size: .9rem; }
+
+  /* features */
+  .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .feat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 24px; }
+  .feat .ic { width: 30px; height: 30px; color: var(--teal); margin-bottom: 14px; }
+  :root[data-theme="dark"] .feat .ic { color: var(--optic); }
+  .feat h3 { margin: 0 0 6px; font-size: 1.08rem; letter-spacing: -.01em; }
+  .feat p { margin: 0; color: var(--muted); font-size: .93rem; }
+  .feat.wide { grid-column: span 3; display: flex; gap: 20px; align-items: center; background: linear-gradient(100deg, color-mix(in srgb, var(--court) 16%, var(--surface)), var(--surface)); }
+  .feat.wide .ic { margin: 0; flex: none; width: 38px; height: 38px; }
+
+  /* pricing */
+  .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: stretch; }
+  .plan { background: var(--surface); border: 1px solid var(--line-strong); border-radius: 16px; padding: 28px 26px; display: flex; flex-direction: column; }
+  .plan.feat-plan { border-color: var(--optic); box-shadow: var(--glow), var(--shadow); position: relative; }
+  .plan .tag { position: absolute; top: -11px; left: 26px; background: var(--optic); color: var(--optic-ink); font-family: var(--font-mono); font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
+  .plan .pname { font-family: var(--font-mono); letter-spacing: .08em; text-transform: uppercase; font-size: .8rem; color: var(--teal); font-weight: 700; }
+  .plan .amt { font-weight: 800; letter-spacing: -.03em; font-size: 2.9rem; margin: 12px 0 2px; font-variant-numeric: tabular-nums; }
+  .plan .amt small { font-size: .95rem; font-weight: 600; color: var(--muted); letter-spacing: 0; }
+  .plan .quota { color: var(--muted); font-size: .92rem; margin-bottom: 18px; }
+  .plan ul { list-style: none; margin: 0 0 24px; padding: 0; display: flex; flex-direction: column; gap: 11px; }
+  .plan li { display: flex; gap: 10px; font-size: .94rem; color: var(--ink-2); }
+  .plan li svg { flex: none; width: 18px; height: 18px; color: var(--teal); margin-top: 2px; }
+  :root[data-theme="dark"] .plan li svg { color: var(--optic); }
+  .plan .btn { justify-content: center; margin-top: auto; }
+  .price-foot { text-align: center; color: var(--muted); font-family: var(--font-mono); font-size: .82rem; margin-top: 22px; }
+
+  /* faq */
+  .faq { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 32px; }
+  details { border-bottom: 1px solid var(--line); padding: 6px 0; }
+  summary { cursor: pointer; font-weight: 600; letter-spacing: -.01em; padding: 12px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; font-family: var(--font-mono); color: var(--teal); font-size: 1.3rem; transition: transform .2s; }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p { margin: 0 0 14px; color: var(--muted); font-size: .95rem; }
+
+  /* final cta */
+  .final { text-align: center; padding: clamp(60px, 9vw, 110px) 0; }
+  .final .display { font-size: clamp(2.1rem, 5.2vw, 3.6rem); }
+  .final p { color: var(--ink-2); font-size: 1.15rem; margin: 18px auto 30px; max-width: 44ch; }
+
+  footer { border-top: 1px solid var(--line); padding: 40px 0; color: var(--muted); }
+  .foot-in { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px; align-items: center; }
+  .foot-links { display: flex; flex-wrap: wrap; gap: 22px; font-size: .9rem; }
+  .foot-links a:hover { color: var(--ink); }
+  .disclaimer { font-family: var(--font-mono); font-size: .72rem; color: var(--muted); opacity: .8; margin-top: 18px; }
+
+  .theme-toggle { background: transparent; border: 1px solid var(--line-strong); color: var(--muted); width: 36px; height: 36px; border-radius: 9px; cursor: pointer; display: grid; place-items: center; }
+  .theme-toggle:hover { color: var(--ink); border-color: var(--ink); }
+
+  /* reveal */
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (max-width: 900px) {
+    .hero-grid, .problem-grid, .sample-grid { grid-template-columns: 1fr; }
+    .steps, .feat-grid, .price-grid { grid-template-columns: 1fr; }
+    .feat.wide { grid-column: auto; flex-direction: column; align-items: flex-start; }
+    .faq { grid-template-columns: 1fr; }
+    .nav-links a:not(.cta-sm) { display: none; }
+    .court-bg svg { opacity: .25; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { transition: none; opacity: 1; transform: none; }
+    .rec { animation: none; }
+    [data-draw] { stroke-dashoffset: 0 !important; }
+  }
+</style>
+
+<div class="pai">
+  <!-- ===== NAV ===== -->
+  <nav class="nav">
+    <div class="wrap nav-in">
+      <a class="brand" href="#top"><span class="dot"></span>PickleAI</a>
+      <div class="nav-links">
+        <a href="#how">How it works</a>
+        <a href="#sample">Sample analysis</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <button class="theme-toggle" id="themeBtn" aria-label="Toggle light / dark theme" title="Toggle theme">◐</button>
+        <a class="btn btn-primary btn-sm cta-sm" href="#pricing">Analyze free</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <header class="hero" id="top">
+    <div class="court-bg" aria-hidden="true">
+      <svg viewBox="0 0 900 620" fill="none">
+        <g stroke="var(--court)" stroke-width="1.5" opacity="0.9">
+          <path d="M120 560 L360 120 L720 120 L860 560 Z"/>
+          <path d="M120 560 L860 560"/>
+          <path d="M225 400 L757 400"/>            <!-- kitchen line -->
+          <path d="M300 240 L780 240"/>            <!-- kitchen far -->
+          <path d="M490 120 L490 560"/>            <!-- center -->
+        </g>
+        <path d="M300 240 L780 240" stroke="var(--optic)" stroke-width="2.5" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="wrap hero-grid">
+      <div class="reveal in">
+        <p class="eyebrow" style="margin-bottom:20px">AI coaching · built for pickleball</p>
+        <h1 class="display">Your personal<br>pickleball coach.<br><span class="hl">In your pocket.</span></h1>
+        <p class="lede">Upload a clip of your game. Get pro-level feedback, drills, and a plan to improve — in minutes, not $100 an hour.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#pricing">Analyze my first clip free →</a>
+          <a class="btn btn-ghost" href="#sample">See a sample analysis</a>
+        </div>
+        <div class="trust">
+          <span><b>✓</b> No coach required</span>
+          <span><b>✓</b> Works with any phone video</span>
+          <span><b>✓</b> Cancel anytime</span>
+        </div>
+      </div>
+
+      <!-- ANALYSIS PANEL -->
+      <div class="panel reveal in" style="transition-delay:.1s">
+        <div class="panel-top">
+          <span class="rec"></span>
+          <span class="lbl">clip_04 · third-shot drop</span>
+          <span class="grade">ANALYZING ● 100%</span>
+        </div>
+        <div class="frame">
+          <svg viewBox="0 0 400 275" aria-label="Pose-estimation overlay of a player hitting a third-shot drop">
+            <!-- court hint -->
+            <path d="M20 250 L150 150 L360 150 L392 250 Z" fill="none" stroke="var(--court)" stroke-width="1" opacity=".45"/>
+            <path d="M70 205 L340 205" stroke="var(--optic)" stroke-width="1.4" opacity=".5"/>
+            <!-- ball arc -->
+            <path id="arc" data-draw d="M250 120 Q300 40 360 96" fill="none" stroke="var(--teal)" stroke-width="2" stroke-dasharray="4 5" opacity=".9"/>
+            <circle id="ball" cx="360" cy="96" r="6" fill="var(--optic)" stroke="var(--optic-ink)" stroke-width=".6"/>
+            <!-- SKELETON (keypoints + bones), side view facing right -->
+            <g id="skel" stroke="var(--teal-bright)" stroke-width="3" stroke-linecap="round" fill="none" data-draw>
+              <path d="M150 92 L156 150"/>          <!-- spine -->
+              <path d="M150 92 L182 112"/>          <!-- upper arm -->
+              <path d="M182 112 L214 128"/>         <!-- forearm -->
+              <path d="M156 150 L142 198"/>         <!-- front thigh -->
+              <path d="M142 198 L149 250"/>         <!-- front shin -->
+              <path d="M156 150 L186 194"/>         <!-- back thigh -->
+              <path d="M186 194 L203 248"/>         <!-- back shin -->
+            </g>
+            <!-- paddle -->
+            <g stroke="var(--optic)" stroke-width="3" stroke-linecap="round">
+              <path d="M214 128 L238 108"/>
+              <ellipse cx="244" cy="102" rx="9" ry="12" fill="none" transform="rotate(-32 244 102)"/>
+            </g>
+            <!-- joints -->
+            <g fill="var(--optic)" stroke="var(--optic-ink)" stroke-width=".5">
+              <circle cx="150" cy="78" r="10"/>    <!-- head -->
+              <circle cx="150" cy="92" r="4"/>
+              <circle cx="182" cy="112" r="4"/>
+              <circle cx="214" cy="128" r="4"/>
+              <circle cx="156" cy="150" r="4"/>
+              <circle cx="142" cy="198" r="4"/>
+              <circle cx="149" cy="250" r="4"/>
+              <circle cx="186" cy="194" r="4"/>
+              <circle cx="203" cy="248" r="4"/>
+            </g>
+          </svg>
+          <div class="callout co1 reveal in" style="transition-delay:.5s">PADDLE ANGLE&nbsp; <span class="ok">62° ✓ soft</span></div>
+          <div class="callout co2 reveal in" style="transition-delay:.7s">CONTACT&nbsp; OUT FRONT <span class="ok">✓</span></div>
+          <div class="callout co3 reveal in" style="transition-delay:.9s">KNEE BEND&nbsp; <span style="color:#ffcf5c">SHALLOW</span></div>
+        </div>
+        <div class="panel-foot">
+          <div class="stat"><div class="n">7.8</div><div class="k">Technique</div></div>
+          <div class="stat"><div class="n">6.4</div><div class="k">Footwork</div></div>
+          <div class="stat"><div class="n">8.1</div><div class="k">Contact</div></div>
+          <div class="stat"><div class="n">3</div><div class="k">Fixes</div></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== PROBLEM ===== -->
+  <section class="band problem">
+    <div class="wrap problem-grid">
+      <div class="reveal">
+        <p class="eyebrow" style="margin-bottom:18px">The plateau</p>
+        <p class="big">You practice. You play. But you keep making the <em>same mistakes</em> — and you can't see why.</p>
+      </div>
+      <div class="problem-list reveal">
+        <div><b>A coach could tell you.</b> If you could book one every week — and afford it.</div>
+        <div><b>YouTube is generic.</b> It's not about <i>your</i> swing, <i>your</i> footwork, <i>your</i> kitchen game.</div>
+        <div><b>Your own footage is silent.</b> Watching it back doesn't tell you what to fix or how.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <section class="band band-alt" id="how">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <p class="eyebrow">The workflow</p>
+        <h2 class="display">Three steps to a better game.</h2>
+      </div>
+      <div class="steps">
+        <div class="step reveal">
+          <span class="idx">STEP 01</span>
+          <h3>Upload</h3>
+          <p>Drop in a clip from your phone — a serve, a dink rally, a full point. Any angle, any court.</p>
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L8 8m4-4l4 4"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+        </div>
+        <div class="step reveal" style="transition-delay:.08s">
+          <span class="idx">STEP 02</span>
+          <h3>We analyze</h3>
+          <p>Our AI maps your body mechanics, timing, positioning, and shot selection against a pickleball coaching rubric.</p>
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8 11h6M11 8v6" opacity=".6"/></svg>
+        </div>
+        <div class="step reveal" style="transition-delay:.16s">
+          <span class="idx">STEP 03</span>
+          <h3>You improve</h3>
+          <p>Get the three fixes that matter most, drills to groove them, and progress tracked across every upload.</p>
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 3 8-8"/><path d="M16 4h4v4"/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SAMPLE ANALYSIS (interactive) ===== -->
+  <section class="band" id="sample">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <p class="eyebrow">Show, don't tell</p>
+        <h2 class="display">This is what you get back.</h2>
+        <p>Pick a shot to see a real report. Every fix is specific, ranked by impact, and paired with a drill.</p>
+      </div>
+      <div class="sample-grid">
+        <div class="reveal">
+          <div class="tabs" role="tablist" aria-label="Sample shot type">
+            <button class="tab" role="tab" aria-selected="true" data-shot="drop">Third-shot drop</button>
+            <button class="tab" role="tab" aria-selected="false" data-shot="dink">Dink</button>
+            <button class="tab" role="tab" aria-selected="false" data-shot="serve">Serve</button>
+          </div>
+          <div class="scorebars" id="scorebars"></div>
+          <p class="sample-note" id="summaryLine"></p>
+        </div>
+
+        <div class="report reveal" style="transition-delay:.08s" aria-live="polite">
+          <div class="report-hd">
+            <span class="t" id="reportTitle"></span>
+            <span class="sc" id="reportScore"></span>
+          </div>
+          <div id="fixes"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURES ===== -->
+  <section class="band band-alt">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <p class="eyebrow">What's inside</p>
+        <h2 class="display">More than a verdict — a plan.</h2>
+      </div>
+      <div class="feat-grid">
+        <div class="feat reveal">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/><circle cx="12" cy="11" r="3"/></svg>
+          <h3>Frame-by-frame breakdown</h3>
+          <p>See exactly what your body is doing at contact — with the pose overlay to prove it.</p>
+        </div>
+        <div class="feat reveal" style="transition-delay:.06s">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h16M4 18h7"/><circle cx="18" cy="6" r="2"/></svg>
+          <h3>Prioritized fixes</h3>
+          <p>The three things that'll help most, ranked — not a wall of nitpicks you'll ignore.</p>
+        </div>
+        <div class="feat reveal" style="transition-delay:.12s">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4 12H2M22 12h-2"/><circle cx="12" cy="12" r="5"/></svg>
+          <h3>Real drills</h3>
+          <p>Specific practice for each fix, so the feedback turns into muscle memory.</p>
+        </div>
+        <div class="feat wide reveal">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+          <div>
+            <h3>Progress tracking, built for pickleball</h3>
+            <p>Watch your weak spots turn into strengths over time. Dinks, third-shot drops, kitchen positioning, stacking — analyzed the way the sport is actually played, not by a generic swing app.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PRICING ===== -->
+  <section class="band" id="pricing">
+    <div class="wrap">
+      <div class="sec-head reveal" style="text-align:center; margin-left:auto; margin-right:auto;">
+        <p class="eyebrow">Pricing</p>
+        <h2 class="display">Less than one lesson a month.</h2>
+        <p style="margin-left:auto;margin-right:auto">Start with a free analysis — no card required. Upgrade when you want more.</p>
+      </div>
+      <div class="price-grid">
+        <div class="plan reveal">
+          <span class="pname">Free trial</span>
+          <div class="amt">$0<small></small></div>
+          <div class="quota">1 full analysis · one time</div>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12l5 5L20 6"/></svg>One complete coaching report</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12l5 5L20 6"/></svg>Top fixes + drills</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12l5 5L20 6"/></svg>No credit card</li>
+          </ul>
+          <a class="btn btn-ghost" href="#top">Start free</a>
+        </div>
+        <div class="plan feat-plan reveal" style="transition-delay:.06s">
+          <span class="tag">Most popular</span>
+          <span class="pname">Starter</span>
+          <div class="amt">$14<small>/mo</small></div>
+          <div class="quota">10 analyses / month</div>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12l5 5L20 6"/></svg>Full reports + all shot types</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12l5 5L20 6"/></svg>Drills for every fix</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12l5 5L20 6"/></svg>History + progress tracking</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12l5 5L20 6"/></svg>Email when analysis is ready</li>
+          </ul>
+          <a class="btn btn-primary" href="#top">Choose Starter</a>
+        </div>
+        <div class="plan reveal" style="transition-delay:.12s">
+          <span class="pname">Pro</span>
+          <div class="amt">$28<small>/mo</small></div>
+          <div class="quota">30 analyses / month</div>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12l5 5L20 6"/></svg>Everything in Starter</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12l5 5L20 6"/></svg>Priority processing</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12l5 5L20 6"/></svg>Longer clips + full-rally analysis</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12l5 5L20 6"/></svg>Deeper progress analytics</li>
+          </ul>
+          <a class="btn btn-ghost" href="#top">Choose Pro</a>
+        </div>
+      </div>
+      <p class="price-foot">Save ~2 months on annual billing · Cancel anytime, no lock-in</p>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="band band-alt" id="faq">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <p class="eyebrow">Good questions</p>
+        <h2 class="display">Before you upload.</h2>
+      </div>
+      <div class="faq reveal">
+        <div>
+          <details><summary>What kind of video works?</summary><p>Any phone video. A side or back angle where the whole point is visible works best — but don't overthink it, just film and upload.</p></details>
+          <details><summary>How accurate is it, really?</summary><p>It's strong on technique, timing, and positioning — the mechanics a coach would flag. When a clip is too dark or far to read confidently, we tell you instead of guessing.</p></details>
+          <details><summary>Do I need special equipment?</summary><p>No. Just your phone and a way to prop it up. No sensors, no wearables.</p></details>
+        </div>
+        <div>
+          <details><summary>Is my video private?</summary><p>Yes — private by default. Only you see your clips and reports, and you can delete any of them (or your whole account) anytime.</p></details>
+          <details><summary>Can this replace my coach?</summary><p>Think of it as your coach between lessons: instant feedback whenever you play, at a fraction of the cost. Many players use both.</p></details>
+          <details><summary>What skill levels is it for?</summary><p>Beginner through advanced — from your first dinks to fine-tuning a 4.5 third-shot drop. Feedback adapts to your level.</p></details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FINAL CTA ===== -->
+  <section class="final">
+    <div class="wrap reveal">
+      <p class="eyebrow" style="margin-bottom:20px">Stop guessing</p>
+      <h2 class="display">Start improving.</h2>
+      <p>Your next breakthrough is one clip away. See what a coach would see — for free.</p>
+      <a class="btn btn-primary" href="#top" style="font-size:1.08rem;padding:16px 28px">Analyze my first clip free →</a>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="wrap">
+      <div class="foot-in">
+        <a class="brand" href="#top"><span class="dot"></span>PickleAI</a>
+        <div class="foot-links">
+          <a href="#pricing">Pricing</a>
+          <a href="#faq">FAQ</a>
+          <a href="#top">Privacy</a>
+          <a href="#top">Terms</a>
+          <a href="#top">Contact</a>
+          <a href="#top">Log in</a>
+        </div>
+      </div>
+      <p class="disclaimer">Concept landing-page mockup · sample scores and feedback are illustrative · not a live product</p>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+
+  // theme toggle
+  var btn = document.getElementById('themeBtn');
+  btn && btn.addEventListener('click', function () {
+    var cur = root.getAttribute('data-theme');
+    if (!cur) {
+      var sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      cur = sysDark ? 'dark' : 'light';
+    }
+    root.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+  });
+
+  // scroll reveal
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+
+  // ball arc stroke-draw on load
+  var arc = document.getElementById('arc');
+  if (arc && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var len = arc.getTotalLength ? arc.getTotalLength() : 120;
+    arc.style.strokeDasharray = '4 5';
+    var ball = document.getElementById('ball');
+    if (ball) { ball.style.transition = 'opacity .4s ease .9s'; ball.style.opacity = '0'; setTimeout(function(){ ball.style.opacity='1'; }, 50); }
+  }
+
+  // ---- interactive sample analysis ----
+  var DATA = {
+    drop: {
+      title: "Third-shot drop", score: "7.4 / 10",
+      summary: "Soft hands and a great contact point — your drop is close. Get lower and you'll take the pace off for good.",
+      scores: [["Technique",78],["Footwork",64],["Contact point",81],["Consistency",70]],
+      fixes: [
+        ["Bend your knees deeper","Your paddle face is right, but you're reaching down with your arm instead of your legs. Sinking lower lets the shot float softer and land in the kitchen.","Wall drops from a low athletic stance — 3×20"],
+        ["Slow the backswing","A compact, unhurried backswing keeps the drop soft under pressure. Right now it speeds up when the ball comes fast.","Shadow-swing metronome — 5 min"],
+        ["Recover to the line","You admire the drop instead of moving up. Split-step, then step in toward the kitchen line every time.","Drop-and-advance live reps — 4×10"]
+      ]
+    },
+    dink: {
+      title: "Dink", score: "8.0 / 10",
+      summary: "Patient and controlled at the kitchen. Tighten your target window and you'll start winning the exchanges.",
+      scores: [["Technique",82],["Footwork",71],["Contact point",84],["Consistency",76]],
+      fixes: [
+        ["Aim cross-court more","Most of your dinks go straight, giving your opponent easy angles. Cross-court gives you margin and pulls them wide.","Cross-court dink rally — 5 min continuous"],
+        ["Stay off your heels","You drift back onto your heels between dinks. Weight forward on the balls of your feet keeps you ready to attack a pop-up.","Ready-position holds — 3×30s"],
+        ["Quieter paddle","A little too much wrist is adding pace you don't want. Push with the shoulder, keep the wrist calm.","Soft-hands catch drill — 4×15"]
+      ]
+    },
+    serve: {
+      title: "Serve", score: "6.9 / 10",
+      summary: "Legal and consistent, but it's not pressuring anyone yet. More depth and a repeatable toss will earn free points.",
+      scores: [["Technique",70],["Footwork",66],["Contact point",73],["Consistency",68]],
+      fixes: [
+        ["Serve deeper","Your serves land mid-court, letting returners step in. Aim for the back third to push them off the line.","Deep-target zone serves — 30 reps"],
+        ["Consistent drop/toss","The release height varies serve to serve, which moves your contact point around. Lock in one repeatable drop.","Same-spot toss reps — 25"],
+        ["Full low-to-high swing","You're arming it. Start low and swing up through contact for depth and spin without extra effort.","Slow-motion swing grooving — 5 min"]
+      ]
+    }
+  };
+
+  var scoreEl = document.getElementById('scorebars');
+  var titleEl = document.getElementById('reportTitle');
+  var scEl = document.getElementById('reportScore');
+  var fixesEl = document.getElementById('fixes');
+  var sumEl = document.getElementById('summaryLine');
+
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function render(shot) {
+    var d = DATA[shot];
+    titleEl.textContent = d.title + " · report";
+    scEl.textContent = d.score;
+    sumEl.textContent = d.summary;
+    scoreEl.innerHTML = d.scores.map(function (s) {
+      return '<div class="sb"><span class="lab">' + esc(s[0]) + '</span>' +
+             '<span class="track"><span class="fill" style="width:0"></span></span>' +
+             '<span class="v">' + s[1] + '</span></div>';
+    }).join('');
+    // animate bars
+    requestAnimationFrame(function () {
+      var fills = scoreEl.querySelectorAll('.fill');
+      d.scores.forEach(function (s, i) { if (fills[i]) fills[i].style.width = s[1] + '%'; });
+    });
+    fixesEl.innerHTML = d.fixes.map(function (f, i) {
+      return '<div class="fix"><span class="rank">' + (i + 1) + '</span><div>' +
+             '<h4>' + esc(f[0]) + '</h4><p>' + esc(f[1]) + '</p>' +
+             '<div class="drill">' + esc(f[2]) + '</div></div></div>';
+    }).join('');
+  }
+
+  var tabs = document.querySelectorAll('.tab');
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      tabs.forEach(function (x) { x.setAttribute('aria-selected', 'false'); });
+      t.setAttribute('aria-selected', 'true');
+      render(t.getAttribute('data-shot'));
+    });
+  });
+  render('drop');
+})();
+</script>
+</body>
+</html>

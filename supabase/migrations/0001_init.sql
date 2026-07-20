@@ -103,6 +103,9 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
+-- Server-internal: not callable via the API (PUBLIC holds the default grant).
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+
 -- ============ atomic quota claim (called by the server before queuing a video) ============
 
 create or replace function public.claim_analysis(uid uuid)
@@ -120,7 +123,7 @@ begin
 end;
 $$;
 
-revoke execute on function public.claim_analysis(uuid) from anon, authenticated;
+revoke execute on function public.claim_analysis(uuid) from public, anon, authenticated;
 
 -- ============ storage: private videos bucket ============
 

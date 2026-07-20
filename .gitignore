@@ -1,0 +1,26 @@
+# Raw video / clips — never commit (repo bloat + people's likeness).
+# Keep clips locally in spike/clips/ or in Supabase Storage instead.
+spike/clips/
+*.mp4
+*.mov
+*.MOV
+*.avi
+*.mkv
+*.webm
+
+# Filled-in labels may reference real people — keep the template, ignore real sets.
+spike/eval/labels_*.csv
+!spike/eval/labels_template.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Env / secrets
+.env
+.env.*
+
+# OS
+.DS_Store

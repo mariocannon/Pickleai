@@ -1,0 +1,8 @@
+clip_id,rep,shot_type,handedness,view_angle,lighting,distance,contact_timestamp_s,knee_bend_bucket,knee_angle_deg_est,paddle_face,contact_point,landing_zone,clip_quality,notes
+# One row PER REP. Fill from the video using a consistent protocol. Delete these comment lines before running the harness.
+# view_angle: side | back | oblique      lighting: good | glare | shade | dim      distance: close | mid | far
+# knee_bend_bucket: deep | ok | upright   knee_angle_deg_est: optional protractor angle    paddle_face: open | neutral | closed
+# contact_point: front | even | late      landing_zone: kitchen | mid | long | out         clip_quality: clean | usable | poor
+example_side_01,1,third_shot_drop,right,side,good,mid,3.4,upright,156,open,front,long,clean,arm-only lift
+example_side_01,2,third_shot_drop,right,side,good,mid,7.1,ok,134,neutral,front,kitchen,clean,
+example_back_02,1,dink,left,back,shade,far,2.0,ok,,neutral,even,kitchen,usable,ball partly out of frame at contact

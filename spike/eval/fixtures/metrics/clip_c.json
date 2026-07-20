@@ -1,0 +1,8 @@
+{
+  "clip_id": "clip_c",
+  "tracking_confidence": 0.42,
+  "predicted_contacts": [
+    {"t": 1.60, "knee_deg": 141, "paddle_face": null, "landing_zone": null},
+    {"t": 6.20, "knee_deg": 133, "paddle_face": null, "landing_zone": null}
+  ]
+}

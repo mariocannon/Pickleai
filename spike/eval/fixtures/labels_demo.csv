@@ -1,0 +1,8 @@
+clip_id,rep,shot_type,handedness,view_angle,lighting,distance,contact_timestamp_s,knee_bend_bucket,knee_angle_deg_est,paddle_face,contact_point,landing_zone,clip_quality,notes
+clip_a,1,third_shot_drop,right,side,good,mid,3.4,upright,156,open,front,long,clean,arm-only lift
+clip_a,2,third_shot_drop,right,side,good,mid,7.1,ok,134,neutral,front,kitchen,clean,
+clip_a,3,third_shot_drop,right,side,good,mid,10.8,ok,138,neutral,front,kitchen,clean,
+clip_b,1,dink,left,back,shade,far,2.0,ok,132,neutral,even,kitchen,usable,
+clip_b,2,dink,left,back,shade,far,5.5,deep,122,closed,even,mid,usable,
+clip_c,1,third_shot_drop,right,oblique,dim,far,1.5,ok,135,neutral,front,kitchen,poor,phone handheld
+clip_c,2,third_shot_drop,right,oblique,dim,far,4.0,upright,150,open,late,long,poor,dark + far

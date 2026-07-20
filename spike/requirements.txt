@@ -1,0 +1,7 @@
+# Coaching step (the risky link this spike proves)
+anthropic>=0.40
+
+# Measurement step (pose extraction from real clips)
+mediapipe>=0.10
+opencv-python>=4.9
+numpy>=1.26

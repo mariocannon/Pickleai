@@ -1,0 +1,37 @@
+{
+  "clip_id": "sample_drop_weak",
+  "shot_type": "third_shot_drop",
+  "player_context": {
+    "skill_level": 3.0,
+    "goal": "third-shot drop consistency",
+    "handedness": "right",
+    "note": "My drops keep sailing long and I can't figure out why."
+  },
+  "clip_meta": {
+    "duration_s": 47,
+    "fps": 30,
+    "reps_detected": 6,
+    "view_angle": "side",
+    "tracking_confidence": 0.86
+  },
+  "aggregate_metrics": {
+    "knee_flexion_deg_at_contact": { "mean": 158, "std": 6, "ideal_range": [120, 140], "note": "smaller = deeper bend; measured at ball contact" },
+    "paddle_face_angle_deg_at_contact": { "mean": 63, "std": 9, "ideal_range": [55, 70], "note": "degrees open from vertical; open face lofts the ball" },
+    "contact_point_vs_lead_foot_cm": { "mean": 12, "std": 7, "ideal_range": [5, 25], "note": "positive = contact in front of lead foot (good)" },
+    "contact_height_cm": { "mean": 46, "std": 9, "ideal_range": [30, 55], "note": "paddle-ball contact height above ground" },
+    "backswing_length_cm": { "mean": 55, "std": 14, "ideal_range": [20, 35], "note": "paddle travel behind hip; longer adds pace" },
+    "swing_path": "low_to_high",
+    "wrist_stability_index": { "value": 0.62, "ideal_min": 0.8, "note": "1.0 = perfectly quiet wrist through contact" },
+    "weight_transfer_score": { "value": 0.48, "ideal_min": 0.7, "note": "back-to-front weight shift into the shot" },
+    "split_step_timing_ms": { "mean": -60, "std": 40, "ideal_range": [-20, 20], "note": "ms relative to opponent contact; negative = late" },
+    "recovery_to_kitchen_score": { "value": 0.40, "ideal_min": 0.75, "note": "how consistently player advances toward the kitchen after the drop" },
+    "shot_outcome": {
+      "landing_zone_pct": { "kitchen": 33, "mid_court": 50, "long": 17 },
+      "note": "where the drop landed across the 6 reps; kitchen = ideal"
+    }
+  },
+  "per_rep_flags": [
+    { "rep": 2, "flag": "long", "note": "shallow knee bend, long backswing" },
+    { "rep": 5, "flag": "long", "note": "late split-step, arm-only lift" }
+  ]
+}

@@ -6,9 +6,24 @@ const PROTECTED = ["/dashboard", "/upload", "/reports", "/account"];
 export default async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // Supabase not configured yet (fresh deploy without env vars): keep the
+  // public site up; just bounce app routes to the login page.
+  if (!url || !anonKey) {
+    const path = request.nextUrl.pathname;
+    if (PROTECTED.some((p) => path.startsWith(p))) {
+      const redirect = request.nextUrl.clone();
+      redirect.pathname = "/login";
+      return NextResponse.redirect(redirect);
+    }
+    return response;
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    anonKey,
     {
       cookies: {
         getAll: () => request.cookies.getAll(),

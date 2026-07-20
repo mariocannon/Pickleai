@@ -53,7 +53,17 @@ function LoginForm() {
           New here? Signing in creates your account — your first analysis is free.
         </p>
 
-        {state === "sent" ? (
+        {!process.env.NEXT_PUBLIC_SUPABASE_URL ||
+        !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? (
+          <div className="card" style={{ background: "var(--surface-2)" }}>
+            <b>Almost there — backend not connected yet.</b>
+            <p style={{ margin: "6px 0 0", color: "var(--muted)", fontSize: "0.92rem" }}>
+              This deploy is missing its Supabase environment variables. Add the
+              values from <span className="mono">web/.env.example</span> in your
+              hosting settings and redeploy.
+            </p>
+          </div>
+        ) : state === "sent" ? (
           <div className="card" style={{ background: "var(--surface-2)" }}>
             <b>Check your email.</b>
             <p style={{ margin: "6px 0 0", color: "var(--muted)", fontSize: "0.92rem" }}>

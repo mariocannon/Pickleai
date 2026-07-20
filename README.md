@@ -2,41 +2,44 @@
 
 **AI-powered pickleball coaching. Upload a clip, get pro-level feedback in minutes.**
 
-PickleAI is a subscription web app (inspired by the "Wrestle AI" model) that lets
-pickleball players upload video of themselves playing and receive automated,
-personalized critique — technique breakdowns, shot-by-shot tips, drills, and a
-running improvement plan.
+PickleAI is a subscription web app: players upload video of themselves playing and
+receive automated, personalized critique — technique breakdowns grounded in measured
+biomechanics, ranked fixes, drills, and progress over time.
 
----
+## Repo map
 
-## What's in this repo (planning phase)
+| Path | What it is |
+|------|------------|
+| **`web/`** | **The product** — Next.js app: landing page, auth, upload, reports, Stripe billing |
+| **`supabase/migrations/`** | Database schema, RLS, quota function, storage policies |
+| **`worker/`** | Python analysis worker: video → measured metrics → Claude coaching → report |
+| `spike/` | The proven AI pipeline (coaching rubric, extractor, eval harness) the worker reuses |
+| `docs/` | Product plan, MVP scope, monetization, roadmap, **[setup guide](docs/build-guide.md)** |
+| `mockups/` | Original static design mockups (superseded by `web/`, kept for reference) |
 
-This branch contains **planning only — no application code yet.** It's the blueprint
-we'll build from.
+## Quick start
 
-| Doc | What it covers |
-|-----|----------------|
-| [`docs/product-plan.md`](docs/product-plan.md) | Vision, personas, value prop, competitive angle, success metrics |
-| [`docs/mvp-scope.md`](docs/mvp-scope.md) | Exactly what ships in the MVP (and what doesn't) |
-| [`docs/landing-page.md`](docs/landing-page.md) | Landing page structure, section-by-section copy, and CTAs |
-| [`docs/web-app-mvp.md`](docs/web-app-mvp.md) | App pages, user flows, and screen-by-screen breakdown |
-| [`docs/ai-pipeline.md`](docs/ai-pipeline.md) | How a video becomes coaching feedback (the technical core) |
-| [`docs/tech-architecture.md`](docs/tech-architecture.md) | Stack, data model, storage, and system diagram |
-| [`docs/monetization.md`](docs/monetization.md) | Pricing tiers, subscription mechanics, unit economics |
-| [`docs/roadmap.md`](docs/roadmap.md) | Phased build plan from MVP to v2 |
+```bash
+# 1. Database — run supabase/migrations/0001_init.sql in your Supabase project
+# 2. Web app
+cd web && cp .env.example .env.local   # fill in keys
+npm install && npm run dev
+# 3. Worker (demo mode: real coaching, mocked extraction)
+cd worker && pip install -r requirements.txt
+PICKLEAI_MOCK_EXTRACTOR=1 python worker.py
+```
 
-## The one-paragraph pitch
+Full runbook (Stripe, Google auth, Netlify deploy): **[docs/build-guide.md](docs/build-guide.md)**
 
-Recreational and competitive pickleball players want to improve but can't afford a
-$60–100/hr coach for regular feedback. PickleAI turns any phone video into a coaching
-session: our pipeline analyzes body mechanics, shot selection, positioning, and timing,
-then delivers plain-English critique plus a prioritized drill plan. Players subscribe
-monthly for unlimited (or metered) uploads and track progress over time.
+## How it works
 
-## Suggested build stack (see tech doc for detail)
+```
+Browser ──▶ Next.js (Netlify) ──▶ Supabase (Auth · Postgres+RLS · private Storage)
+                                        ▲
+            Python worker ──────────────┘   polls queue → pose metrics → Claude
+                                            coaching (evidence-cited) → report
+```
 
-- **Frontend:** Next.js (React) + Tailwind CSS
-- **Backend / DB / Auth / Storage:** Supabase (Postgres, Auth, Storage, Edge Functions)
-- **AI analysis:** Pose estimation (MediaPipe / video model) + Claude for natural-language coaching
-- **Payments:** Stripe subscriptions
-- **Video processing:** Background job queue (async)
+The design principle proven in `spike/`: **the LLM never sees pixels.** It reasons over
+measured biomechanical metrics and cites the numbers behind every fix — that's what
+keeps the coaching trustworthy.

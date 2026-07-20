@@ -1,2 +1,9 @@
+# PickleAI — Netlify deploys the Next.js app in web/ (landing page + product).
+# Set the environment variables from web/.env.example in the Netlify UI.
 [build]
-  publish = "."
+  base = "web"
+  command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

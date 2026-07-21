@@ -9,12 +9,7 @@ export function ThemeToggle() {
       title="Toggle theme"
       onClick={() => {
         const root = document.documentElement;
-        let cur = root.getAttribute("data-theme");
-        if (!cur) {
-          cur = window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light";
-        }
+        const cur = root.getAttribute("data-theme") ?? "light";
         root.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
       }}
     >

@@ -24,28 +24,6 @@
   --shadow: 20px 24px 60px -30px rgba(16, 23, 16, 0.45);
   --glow: none;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0a0f0b;
-    --bg-2: #0d140e;
-    --surface: #121a14;
-    --surface-2: #16211a;
-    --ink: #eaf1e6;
-    --ink-2: #c7d2c1;
-    --muted: #8b9985;
-    --line: #23301f;
-    --line-strong: #33432c;
-    --optic: #cdf23f;
-    --optic-ink: #0d1206;
-    --teal: #2ed9c2;
-    --teal-bright: #46e9d3;
-    --court: #1fb6a6;
-    --amber: #ffcf5c;
-    --danger: #ff7a70;
-    --shadow: 24px 30px 70px -34px rgba(0, 0, 0, 0.8);
-    --glow: 0 0 40px -8px rgba(205, 242, 63, 0.35);
-  }
-}
 :root[data-theme="light"] {
   --bg: #eef1e8; --bg-2: #e5eadb; --surface: #fbfcf8; --surface-2: #f1f4eb;
   --ink: #101710; --ink-2: #2c352a; --muted: #5a6353; --line: #d5dbc9; --line-strong: #c2cab2;
@@ -211,7 +189,6 @@ body {
 .hero h1 { font-size: clamp(2.5rem, 6vw, 4.3rem); }
 .hero .hl { color: var(--court); }
 :root[data-theme="dark"] .hero .hl { color: var(--optic); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .hero .hl { color: var(--optic); } }
 .hero .lede { color: var(--ink-2); font-size: clamp(1.02rem, 1.6vw, 1.22rem); max-width: 46ch; margin: 20px 0 28px; }
 .trust { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 10px 22px; color: var(--muted); font-size: 0.84rem; font-family: var(--font-mono); }
 .trust b { color: var(--teal); }

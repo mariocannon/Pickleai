@@ -104,8 +104,7 @@ async function callClaude(metrics: unknown): Promise<Record<string, unknown>> {
     },
     body: JSON.stringify({
       model: COACH_MODEL,
-      max_tokens: 1500,
-      temperature: 0.4,
+      max_tokens: 4000,
       system: SYSTEM_PROMPT,
       messages: [
         {
@@ -120,12 +119,16 @@ async function callClaude(metrics: unknown): Promise<Record<string, unknown>> {
   });
   if (!res.ok) throw new Error(`Anthropic API ${res.status}: ${await res.text()}`);
   const data = await res.json();
-  let text: string = data.content?.[0]?.text?.trim() ?? "";
-  if (text.startsWith("```")) {
-    text = text.split("```")[1] ?? text;
-    if (text.startsWith("json")) text = text.slice(4);
+  // Find the text block (a thinking block may come first), then isolate the JSON
+  // object so a stray code fence or preamble can't break the parse.
+  const blocks: Array<{ type?: string; text?: string }> = data.content ?? [];
+  const raw = (blocks.find((b) => b.type === "text")?.text ?? blocks[0]?.text ?? "").trim();
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
+  if (start === -1 || end === -1) {
+    throw new Error(`No JSON object in model reply (len ${raw.length}): ${raw.slice(0, 200)}`);
   }
-  return JSON.parse(text);
+  return JSON.parse(raw.slice(start, end + 1));
 }
 
 Deno.serve(async (req) => {

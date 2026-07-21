@@ -19,21 +19,17 @@ Supabase dashboard → **Authentication → URL Configuration**:
 - [ ] Sign in with your email (magic link arrives + redirects back)
 - [ ] Upload a short video → it should sit at "Analyzing…" (worker isn't running yet — expected)
 
-## 4. Run the worker (5 min, on your computer)
-- [ ] Get an Anthropic API key: console.anthropic.com → API keys
-- [ ] In the repo:
-  ```bash
-  cd worker
-  pip install -r requirements.txt
-  export SUPABASE_URL=https://bqfylkqgmzbweczhgjhe.supabase.co
-  export SUPABASE_SERVICE_ROLE_KEY=...   # same key as step 1
-  export ANTHROPIC_API_KEY=sk-ant-...
-  PICKLEAI_MOCK_EXTRACTOR=1 python worker.py
-  ```
-- [ ] Refresh your queued upload → real coaching report appears 🎉
+## 4. Add the AI key (2 min — fully serverless, no computer needed)
+Analysis now runs automatically inside Supabase (edge function + database webhook).
+It just needs the Claude API key:
+
+- [ ] Get an API key: console.anthropic.com → **API keys** → create
+- [ ] Supabase dashboard → **Edge Functions → Secrets** (or Project Settings →
+      Edge Functions) → add secret: name `ANTHROPIC_API_KEY`, value `sk-ant-...`
+- [ ] Upload a clip on the site → coaching report appears in ~30 seconds 🎉
 
 ## Later (not needed to demo)
 - [ ] Stripe: create Starter $14/mo + Pro $28/mo prices, webhook to `/api/stripe/webhook`, add the 4 `STRIPE_*` env vars (see `docs/build-guide.md`)
 - [ ] Google sign-in (optional): add OAuth creds in Supabase → Auth → Providers
-- [ ] Real video analysis: install ML deps in `worker/requirements.txt` and drop `PICKLEAI_MOCK_EXTRACTOR`
+- [ ] Real video analysis: pose extraction can't run in an edge function — deploy `worker/` as a small container (Fly.io/Railway/Modal) with the ML deps when ready
 - [ ] Merge the branch to `main` and point Netlify at it

@@ -38,22 +38,24 @@ npm run dev                    # http://localhost:3000
 You can sign in and upload immediately — clips will sit in "queued" until the worker
 runs.
 
-## 3. Worker (~2 min for demo mode)
+## 3. Analysis pipeline (serverless — the default)
 
-```bash
-cd worker
-pip install -r requirements.txt
-cp .env.example .env && export $(grep -v '^#' .env | xargs)
-python worker.py               # PICKLEAI_MOCK_EXTRACTOR=1 → demo mode
-```
+Analysis runs **inside Supabase**, no servers to operate:
 
-- **Demo mode (default env example):** skips video download/pose extraction and
-  generates plausible measured metrics — but makes the **real Claude coaching call**,
-  so the full product loop works end to end today.
-- **Real mode:** uncomment the ML deps in `worker/requirements.txt`
-  (`mediapipe`, `opencv-python`, `numpy`), install, and remove
-  `PICKLEAI_MOCK_EXTRACTOR`. The worker then downloads each clip and runs the
-  spike extractor for real.
+- `supabase/functions/analyze-video/` — edge function that claims a queued video,
+  produces metrics, calls Claude with the coaching rubric, and writes the report.
+- A database webhook (`videos_analyze_webhook` trigger, pg_net) fires it on every
+  `videos` INSERT. Event-driven; scales automatically.
+
+Setup is one secret: Supabase dashboard → **Edge Functions → Secrets** → add
+`ANTHROPIC_API_KEY`. Deploy/update the function with
+`supabase functions deploy analyze-video` (or via the Supabase MCP).
+
+**Extraction status:** pose estimation (MediaPipe) can't run in an edge function,
+so the function currently generates plausible measured metrics ("demo extraction")
+while making the real Claude coaching call. For real extraction, deploy `worker/`
+as a small container (Fly.io / Railway / Modal) with the ML deps installed — it
+polls the same queue, so no app changes are needed; then disable the demo path.
 
 ## 4. Stripe (~15 min)
 

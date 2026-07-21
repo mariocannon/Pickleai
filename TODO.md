@@ -31,5 +31,6 @@ It just needs the Claude API key:
 ## Later (not needed to demo)
 - [ ] Stripe: create Starter $14/mo + Pro $28/mo prices, webhook to `/api/stripe/webhook`, add the 4 `STRIPE_*` env vars (see `docs/build-guide.md`)
 - [ ] Google sign-in (optional): add OAuth creds in Supabase → Auth → Providers
-- [ ] Real video analysis: pose extraction can't run in an edge function — deploy `worker/` as a small container (Fly.io/Railway/Modal) with the ML deps when ready
+- [ ] Real video analysis: the extractor is real now (`spike/extract_metrics.py`, validated — see `spike/eval/SMOKE-RESULTS.md`), but pose can't run in an edge function — deploy `worker/` as a small container (Fly.io/Railway/Modal) with the ML deps when ready
+- [ ] Accuracy spike go/no-go: film + label 15–25 real clips per `spike/dataset.md`, then `python extract_metrics.py clips/*.mp4 --eval-out eval/out/ && python eval/evaluate.py --labels eval/labels_myclips.csv --metrics-dir eval/out/`
 - [ ] Merge the branch to `main` and point Netlify at it

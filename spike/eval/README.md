@@ -17,16 +17,18 @@ those detectors exist.
 ## With your real clips
 
 1. Film and label per [`../dataset.md`](../dataset.md); save as `labels_myclips.csv`.
-2. Extract metrics for each clip into normalized JSON (`<clip_id>.json`) in a folder,
-   e.g. `out/`. Each file:
-   ```json
-   {"clip_id": "clip_a", "tracking_confidence": 0.9,
-    "predicted_contacts": [{"t": 3.45, "knee_deg": 154, "paddle_face": null, "landing_zone": null}]}
+2. Batch-extract — the extractor writes the normalized JSON itself
+   (clip_id = filename stem, so name files to match the labels CSV):
+   ```bash
+   python ../extract_metrics.py ../clips/*.mp4 --eval-out out/
    ```
-3. Run:
+3. Score:
    ```bash
    python evaluate.py --labels labels_myclips.csv --metrics-dir out/ --out report.md
    ```
+
+A full smoke run of exactly this loop (real video through real pose estimation) is
+written up in [`SMOKE-RESULTS.md`](SMOKE-RESULTS.md).
 
 ## Reading the verdict
 

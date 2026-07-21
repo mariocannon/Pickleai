@@ -1,7 +1,10 @@
 # Coaching step (the risky link this spike proves)
 anthropic>=0.40
 
-# Measurement step (pose extraction from real clips)
-mediapipe>=0.10
+# Measurement step (pose extraction from real clips).
+# Uses the mediapipe Tasks API (PoseLandmarker); tested on mediapipe 0.10.35.
+# The pose model auto-downloads on first run (~6 MB, override: PICKLEAI_POSE_MODEL).
+# Headless linux may also need:  apt-get install libgl1 libgles2
+mediapipe>=0.10.14
 opencv-python>=4.9
 numpy>=1.26

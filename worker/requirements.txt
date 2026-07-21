@@ -2,7 +2,8 @@
 supabase>=2.4
 anthropic>=0.40
 
-# Real extraction (uncomment to enable; heavy)
-# mediapipe>=0.10
+# Real extraction (uncomment to enable; heavy).
+# Pose model auto-downloads on first run; headless linux may need libgl1 + libgles2.
+# mediapipe>=0.10.14
 # opencv-python>=4.9
 # numpy>=1.26

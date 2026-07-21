@@ -12,6 +12,12 @@ spike/clips/
 spike/eval/labels_*.csv
 !spike/eval/labels_template.csv
 
+# Pose model (auto-downloaded, ~6 MB) + test assets + extractor eval output.
+spike/models/
+*.task
+spike/tests/assets/
+spike/eval/out/
+
 # Python
 __pycache__/
 *.pyc

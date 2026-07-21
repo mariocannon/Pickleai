@@ -38,13 +38,9 @@ export default async function ReportsPage() {
               <Link
                 key={v.id}
                 href={`/reports/${v.id}`}
-                className="card"
-                style={{
-                  textDecoration: "none", color: "inherit",
-                  display: "flex", alignItems: "center", gap: 16,
-                }}
+                className="card report-row"
               >
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="report-row-main">
                   <div style={{ fontWeight: 700, fontSize: "0.95rem" }}>
                     {SHOT_TYPES.find((s) => s.id === v.shot_type)?.label ?? v.shot_type}
                   </div>

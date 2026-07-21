@@ -30,7 +30,7 @@ export default async function AppLayout({
           PickleAI
         </Link>
         <SideNav />
-        <div style={{ marginTop: "auto", paddingTop: 12 }}>
+        <div className="side-actions">
           <SignOutButton />
         </div>
       </aside>

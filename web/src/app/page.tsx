@@ -2,6 +2,7 @@ import Link from "next/link";
 import { TelestratorPanel } from "@/components/TelestratorPanel";
 import { SampleAnalysis } from "@/components/SampleAnalysis";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { MobileMenu } from "@/components/MobileMenu";
 
 export default function LandingPage() {
   return (
@@ -21,6 +22,7 @@ export default function LandingPage() {
             <Link className="btn btn-primary btn-sm" href="/login">
               Analyze free
             </Link>
+            <MobileMenu />
           </div>
         </div>
       </nav>
